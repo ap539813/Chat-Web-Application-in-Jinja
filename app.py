@@ -186,6 +186,7 @@ def signup_user():
         db.insert_user(username, hashed_password, role)  # Adjust the method to accept role
         session['username'] = username
         session['token'] = generate_token(username)
+        db.set_user_online(username)
         return url_for('home', username=username)
     return "Error: User already exists!"
 
