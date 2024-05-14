@@ -82,6 +82,7 @@ class Friend(Base):
     friend_id = Column(String, ForeignKey("user.username"), primary_key=True)
     status = Column(Boolean, default=False)  # False = pending, True = approved
     created_at = Column(DateTime, default=datetime.now)
+    last_seen = Column(DateTime, nullable=True)
 
     user = relationship("User", foreign_keys=[user_id])
     friend = relationship("User", foreign_keys=[friend_id])
