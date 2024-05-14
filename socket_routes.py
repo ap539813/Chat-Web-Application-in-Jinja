@@ -3,7 +3,6 @@ socket_routes
 file containing all the routes related to socket.io
 '''
 
-
 from flask_socketio import join_room, emit, leave_room
 from flask import request
 
@@ -45,8 +44,12 @@ def disconnect():
 @socketio.on("send")
 def send(username, message, room_id, rname):
     db.store_message(username, rname, message)
-    emit("incoming", (f"{username}: {message}"), to=room_id)
-    
+    receiver = db.get_user(rname)
+    if receiver and receiver.is_online:
+        emit("incoming", (f"{username}: {message}"), to=room_id)
+    else:
+        print(f"{rname} is offline. Message stored.")
+
 # join room event handler
 # sent when the user joins a room
 @socketio.on("join")
@@ -64,21 +67,26 @@ def join(sender_name, receiver_name):
 
     # if the user is already inside of a room 
     if room_id is not None:
-        
         room.join_room(sender_name, room_id)
         join_room(room_id)
         # emit to everyone in the room except the sender
         emit("incoming", (f"{sender_name} has joined the room.", "green"), to=room_id, include_self=False)
         # emit only to the sender
         emit("incoming", (f"{sender_name} has joined the room. Now talking to {receiver_name}.", "green"))
-        return room_id
+    else:
+        # if the user isn't inside of any room, 
+        # perhaps this user has recently left a room
+        # or is simply a new user looking to chat with someone
+        room_id = room.create_room(sender_name, receiver_name)
+        join_room(room_id)
+        emit("incoming", (f"{sender_name} has joined the room. Now talking to {receiver_name}.", "green"), to=room_id)
 
-    # if the user isn't inside of any room, 
-    # perhaps this user has recently left a room
-    # or is simply a new user looking to chat with someone
-    room_id = room.create_room(sender_name, receiver_name)
-    join_room(room_id)
-    emit("incoming", (f"{sender_name} has joined the room. Now talking to {receiver_name}.", "green"), to=room_id)
+    # Load chat history
+    chat_history = db.get_chat_history(sender_name, receiver_name)
+    for msg, sender in chat_history:
+        color = 'blue' if sender == sender_name else 'green'
+        emit("incoming", (msg, color), to=room_id)
+
     return room_id
 
 # leave room event handler
