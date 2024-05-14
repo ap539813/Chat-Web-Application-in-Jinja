@@ -207,9 +207,9 @@ def store_message(sender: str, receiver: str, message: str):
         session.commit()
 
 
-def get_chat_history(user1: str, user2: str):
+def get_chat_history(user1: str, user2: str, last_seen: datetime = None):
     with Session(engine) as session:
-        chat_history = (
+        query = (
             session.query(
                 ChatHistory.message,
                 User.username.label('sender')
@@ -219,22 +219,25 @@ def get_chat_history(user1: str, user2: str):
                 ((ChatHistory.sender == user1) & (ChatHistory.receiver == user2)) |
                 ((ChatHistory.sender == user2) & (ChatHistory.receiver == user1))
             )
-           
             .order_by(ChatHistory.created_at)
-            .all()
         )
+
+        if last_seen:
+            query = query.filter(ChatHistory.created_at > last_seen)
+        
+        chat_history = query.all()
 
         result = []
         for message, sender in chat_history:
             try:
                 decrypted_message = fernet.decrypt(message).decode()
-                print(decrypted_message)
                 result.append((decrypted_message, sender))
             except (InvalidToken, UnicodeDecodeError):
-                print(f"Error decrypting message from {sender}")
                 continue
         
         return result
+
+
 
 def add_friends(username: str, friend_username: str):
     with Session(engine) as session:
@@ -256,10 +259,20 @@ def add_friends(username: str, friend_username: str):
         session.commit()
         return True
 
-def clear_chat_history():
+def clear_chat_history(sender: str, receiver: str, last_seen: datetime = None):
     with Session(engine) as session:
-        # Delete all records from the ChatHistory table
-        session.query(ChatHistory).delete()
+        query = (
+            session.query(ChatHistory)
+            .filter(
+                ((ChatHistory.sender == sender) & (ChatHistory.receiver == receiver)) |
+                ((ChatHistory.sender == receiver) & (ChatHistory.receiver == sender))
+            )
+        )
+
+        if last_seen:
+            query = query.filter(ChatHistory.created_at <= last_seen)
+        
+        query.delete(synchronize_session=False)
         session.commit()
 
 
