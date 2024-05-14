@@ -1,0 +1,74 @@
+{% extends 'base.jinja' %}
+
+{% block title %}Sign Up - Friends's Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Sign Up</h1>
+    <form id="signupForm" class="needs-validation" novalidate action="#" method="post" onsubmit="event.preventDefault(); signup();">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+            <div class="invalid-feedback">
+                Please choose a username.
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+            <div class="invalid-feedback">
+                Please enter your password.
+            </div>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role</label>
+          <select class="form-control" id="role" name="role" required>
+              <option value="Student">Student</option>
+              <option value="Staff">Staff</option>
+          </select>
+      </div>
+      
+        
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+</div>
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+
+
+function isValidURL(string) {
+    if (string.length == 0) {
+        return false;
+    }
+    return string[0] === "/";
+}
+
+async function signup() {
+    const username = $("#username").val();
+    const password = $("#password").val();
+    const role = $("#role").val(); 
+    const salt = "MySecureSalt123!@#"; 
+    const hashedPassword = CryptoJS.SHA256(password + salt).toString();
+    const signupURL = "{{ url_for('signup_user') }}";
+
+    // Include 'role' in the data sent to the server
+    const res = await axios.post(signupURL, {
+        username: username,
+        password: hashedPassword,
+        salt: salt,
+        role: role  
+    });
+
+    if (!isValidURL(res.data)) {
+        alert(res.data);
+        return;
+    }
+
+    window.open(res.data, "_self");
+}
+
+</script>
+{% endblock %}
