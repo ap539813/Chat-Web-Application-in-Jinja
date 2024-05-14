@@ -13,6 +13,8 @@ from pathlib import Path
 from encryption import get_fernet
 from sqlalchemy import or_
 
+from datetime import datetime
+
 
 
 # ENCRYPTION_KEY = Fernet.generate_key()
@@ -275,3 +277,31 @@ def clear_all_data():
         session.commit()
 
 # clear_all_data()
+
+
+
+def update_last_seen(username: str, friend_username: str, timestamp: datetime):
+    with Session(engine) as session:
+        friendship = (
+            session.query(Friend)
+            .filter(
+                ((Friend.user_id == username) & (Friend.friend_id == friend_username)) |
+                ((Friend.user_id == friend_username) & (Friend.friend_id == username))
+            )
+            .first()
+        )
+        if friendship:
+            friendship.last_seen = timestamp
+            session.commit()
+
+def get_last_seen(username: str, friend_username: str):
+    with Session(engine) as session:
+        friendship = (
+            session.query(Friend.last_seen)
+            .filter(
+                ((Friend.user_id == username) & (Friend.friend_id == friend_username)) |
+                ((Friend.user_id == friend_username) & (Friend.friend_id == username))
+            )
+            .first()
+        )
+        return friendship.last_seen if friendship else None
