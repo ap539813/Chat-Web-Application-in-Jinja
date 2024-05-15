@@ -141,3 +141,95 @@ body {
 .ms-2 {
     margin-left: 0.5rem;
 }
+
+#message_box {
+    height: 400px;
+    overflow: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+.my-message {
+    background-color: #d4edda;
+    color: #155724;
+    border-radius: 10px;
+    text-align: right;
+    float: right;
+    clear: both;
+    max-width: 75%;
+}
+.other-message {
+    background-color: #cce5ff;
+    color: #004085;
+    border-radius: 10px;
+    text-align: left;
+    float: left;
+    clear: both;
+    max-width: 75%;
+}
+
+.system-message-red {
+    color: #751502;
+    border-radius: 10px;
+    text-align: left;
+    float: left;
+    clear: both;
+    max-width: 75%;
+}
+
+.system-message-green {
+    color: #017320;
+    border-radius: 10px;
+    text-align: left;
+    float: left;
+    clear: both;
+    max-width: 75%;
+}
+
+.collapse-arrow {
+    transition: transform 0.2s;
+}
+.collapsed .collapse-arrow {
+    transform: rotate(90deg);
+}
+.text-decoration-none {
+    text-decoration: none;
+}
+/* .request-text {
+    position: relative;
+    display: inline-block;
+} */
+
+/* .dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    background: red;
+} */
+
+
+
+.list-group-item-nested {
+    padding-left: 20px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-group-item-nested button {
+    margin-left: 10px;  
+}
+
+.request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    margin-left: 10px; 
+    line-height: 1; 
+}
