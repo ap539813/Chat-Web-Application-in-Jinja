@@ -35,23 +35,30 @@
                     
                     <!-- Comments Section -->
                     <div>
-                        <form method="post" action="{{ url_for('submit_comment', article_id=article.id) }}">
-                            <div class="form-group">
-                                <label for="comment">Add a comment</label>
-                                <textarea class="form-control" id="comment" name="comment" rows="2" required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
-                        </form>
                         
-                        <h5>Comments</h5>
-                        <ul class="list-group mb-3">
-                            {% for comment in article.comments %}
-                            <li class="list-group-item">
-                                <p>{{ comment.content }}</p>
-                                <small class="text-muted">Commented by {{ comment.author.username }} on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                        <h5>
+                            <a href="#commentsCollapse{{ article.id }}" data-toggle="collapse" aria-expanded="false" aria-controls="commentsCollapse{{ article.id }}" class="d-block">
+                                Comments <i class="fas fa-chevron-down"></i>
+                            </a>
+                        </h5>
+                        <div id="commentsCollapse{{ article.id }}" class="collapse">
+                            <form method="post" action="{{ url_for('submit_comment', article_id=article.id) }}">
+                                <div class="form-group">
+                                    <label for="comment">Add a comment</label>
+                                    <textarea class="form-control" id="comment" name="comment" rows="2" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+                            </form>
+
+                            <ul class="list-group mb-3">
+                                {% for comment in article.comments %}
+                                <li class="list-group-item">
+                                    <p>{{ comment.content }}</p>
+                                    <small class="text-muted">Commented by {{ comment.author.username }} on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                         
                     </div>
                 </div>
@@ -60,4 +67,19 @@
         </div>
     </div>
 </div>
+
+<!-- Include Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function() {
+        // Toggle chevron icon on collapse/expand
+        $('.collapse').on('show.bs.collapse', function () {
+            $(this).prev().find('.fa-chevron-down').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        }).on('hide.bs.collapse', function () {
+            $(this).prev().find('.fa-chevron-up').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        });
+    });
+</script>
+
 {% endblock %}
