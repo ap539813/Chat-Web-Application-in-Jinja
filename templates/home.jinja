@@ -18,24 +18,60 @@
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-3">
-                <h2>Friend Requests</h2>
-                <h3>Sent Requests</h3>
-                <ul class="list-group mb-3">
-                    {% for request in sent_requests %}
-                    <li class="list-group-item">{{ request }}</li>
-                    {% endfor %}
-                </ul>
-                <h3>Received Requests</h3>
-                <ul class="list-group">
-                    {% for request in received_requests %}
-                    <li class="list-group-item">
-                        {{ request }}
-                        <button class="btn btn-success btn-sm" onclick="approveFriend('{{ request }}')">Approve</button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectFriend('{{ request }}')">Reject</button>
-                    </li>
-                    {% endfor %}
-                </ul>
+                <h3>
+                    <a href="#friendRequestsCollapse" data-toggle="collapse" aria-expanded="true" aria-controls="friendRequestsCollapse" class="d-block text-decoration-none">
+                        <span class="position-relative d-inline-block">
+                            Friend Requests
+                        </span>
+                    </a>
+                </h3>
+                <div id="friendRequestsCollapse" class="collapse show">
+                    <h4>
+                        <a href="#sentRequestsCollapse" data-toggle="collapse" aria-expanded="true" aria-controls="sentRequestsCollapse" class="d-block text-decoration-none">
+                            ➤ Sent Requests 
+                        </a>
+                    </h4>
+                    <div id="sentRequestsCollapse" class="collapse show">
+                        <ul class="list-group mb-3">
+                            {% if sent_requests %}
+                                {% for request in sent_requests %}
+                                <li class="list-group-item list-group-item-nested">🟠 {{ request }}</li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item">No sent requests.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <h4>
+                        <a href="#receivedRequestsCollapse" data-toggle="collapse" aria-expanded="true" aria-controls="receivedRequestsCollapse" class="d-block text-decoration-none">
+                            ➤ Received Requests 
+                        </a>
+                    </h4>
+                    <div id="receivedRequestsCollapse" class="collapse show">
+                        <ul class="list-group">
+                            {% if received_requests %}
+                                {% for request in received_requests %}
+                                <li class="list-group-item">
+                                    <div class="request-item">
+                                        {{ request }}
+                                        <button class="btn btn-success btn-sm" onclick="approveFriend('{{ request }}')">[✔]</button>
+                                        <button class="btn btn-danger btn-sm" onclick="rejectFriend('{{ request }}')">[✘]</button>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item">No received requests.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                </div>
+                
             </div>
+            
+            
+            
+            
     
             <!-- Main Content -->
             <div class="col-md-9">
@@ -73,7 +109,7 @@
                 <!-- Messaging App Section -->
                 <div>
                     <h1>Messaging App</h1>
-                    <div id="message_box" class="border p-3" style="height: 400px; overflow: auto;">
+                    <div id="message_box" class="border p-3 mb-3">
                         <!-- Messages will be added here dynamically -->
                     </div>
                     <div id="chat_box" class="mt-3">
@@ -94,6 +130,14 @@
 
 
 <script>
+
+    $(document).ready(function() {
+            $('.collapse').on('shown.bs.collapse', function () {
+                $(this).parent().find('.collapse-arrow').css('transform', 'rotate(90deg)');
+            }).on('hidden.bs.collapse', function () {
+                $(this).parent().find('.collapse-arrow').css('transform', 'rotate(0deg)');
+            });
+        });
 
     function approveFriend(friend_username) {
         fetch('/approve_friend', {
@@ -220,9 +264,11 @@
     const socket = io();
 
     // an incoming message arrives, we'll add the message to the message box
-    socket.on("incoming", (msg, color="black") => {
-        add_message(msg, color);
-    })
+    // socket.on("incoming", (msg, sender) => {
+    //     let color = sender === "{{ username }}" ? "green" : "blue";
+    //     add_message(msg, color, sender);
+    // });
+
     
     // we'll send the message to the server by emitting a "send" event
     function send() {
@@ -292,11 +338,41 @@
 
     // function to add a message to the message box
     // called when an incoming message has reached a client
-    function add_message(message, color) {
+    function add_message(message, color, sender) {
         let box = $("#message_box");
-        let child = $(`<p style="color:${color}; margin: 0px;"></p>`).text(message);
+        let isSender = sender === "{{ username }}";
+        let messageClass = isSender ? 'my-message' : 'other-message';
+        let messageText = isSender ? `You: ${message}` : `${sender}: ${message}`;
+        
+        let child = $(`
+            <div class="${messageClass} p-2 mb-1">
+                <p class="mb-0">${messageText}</p>
+            </div>
+        `);
+        
         box.append(child);
     }
+
+    function add_system_message(message, color) {
+        let box = $("#message_box");
+        let isColor = color === `red`;
+        let messageClass = isColor ? 'system-message-red' : 'system-message-green';
+        let child = $(`
+            <div class="${messageClass} p-2 mb-1">
+                <p class="mb-0">${message}</p>
+            </div>
+        `);
+
+        box.append(child);
+    }
+
+    socket.on("incoming", (msg, color, sender) => {
+        if (sender === "system") {
+            add_system_message(msg, color);
+        } else {
+            add_message(msg, color, sender);
+        }
+    });
     
 </script>
 {% endblock %}
