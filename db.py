@@ -150,17 +150,17 @@ def add_friend_request(username: str, friend_username: str):
         return True
 
 # def approve_friend_request(username: str, friend_username: str):
-    with Session(engine) as session:
-        friendship = (
-            session.query(Friend)
-            .filter((Friend.user_id == username) & (Friend.friend_id == friend_username))
-            .first()
-        )
-        if friendship:
-            friendship.status = True
-            session.commit()
-            return True
-        return False
+    # with Session(engine) as session:
+    #     friendship = (
+    #         session.query(Friend)
+    #         .filter((Friend.user_id == username) & (Friend.friend_id == friend_username))
+    #         .first()
+    #     )
+    #     if friendship:
+    #         friendship.status = True
+    #         session.commit()
+    #         return True
+    #     return False
 
 def approve_friend_request(username: str, friend_username: str):
     
