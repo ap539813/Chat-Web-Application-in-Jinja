@@ -318,3 +318,16 @@ def get_last_seen(username: str, friend_username: str):
             .first()
         )
         return friendship.last_seen if friendship else None
+
+
+
+def add_article(title: str, content: str, author: str):
+    with Session(engine) as session:
+        article = Article(title=title, content=content, author=author)
+        session.add(article)
+        session.commit()
+
+def get_all_articles():
+    with Session(engine) as session:
+        articles = session.query(Article).order_by(Article.created_at.desc()).all()
+        return articles

@@ -1,0 +1,41 @@
+{% extends 'base.jinja' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Section to write an article -->
+    <div class="card mb-4">
+        <div class="card-header">
+            Write a New Article
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('articles') }}">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Displaying all articles -->
+    <div class="card">
+        <div class="card-header">
+            Articles
+        </div>
+        <div class="card-body">
+            {% for article in articles %}
+            <div class="mb-4">
+                <h3>{{ article.title }}</h3>
+                <p>{{ article.content }}</p>
+                <small class="text-muted">By {{ article.author }} on {{ article.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

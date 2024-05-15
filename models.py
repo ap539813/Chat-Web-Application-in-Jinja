@@ -75,6 +75,19 @@ class Room():
         return self.dict[user]
     
 
+class Article(Base):
+    __tablename__ = "articles"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    title: Mapped[str] = mapped_column(String)
+    content: Mapped[str] = mapped_column(String)
+    author: Mapped[str] = mapped_column(String, ForeignKey("user.username"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+
+    author_user = relationship("User", foreign_keys=[author])
+
+    
+
 class Friend(Base):
     __tablename__ = "friends"
 

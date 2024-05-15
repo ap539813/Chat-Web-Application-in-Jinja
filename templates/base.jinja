@@ -31,6 +31,12 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ml-auto"> <!-- Added ml-auto here -->
+                        <li class="nav-item {{ 'active' if request.endpoint == 'articles' else '' }}">
+                            <a class="nav-link" href="{{ url_for('articles') }}">Articles</a>
+                        </li>
+                        <li class="nav-item {{ 'active' if request.endpoint == 'messaging' else '' }}">
+                            <a class="nav-link" href="{{ url_for('home') }}">Messaging</a>
+                        </li>
                         {% if 'username' not in session %}
                             <li class="nav-item {{ 'active' if request.endpoint == 'login' else '' }}">
                                 <a class="nav-link" href="{{ url_for('login') }}">Login</a>
@@ -47,10 +53,6 @@
                 </div>
             </div>
         </nav>
-        
-
-
-
     </header>
 
     <main>
@@ -58,8 +60,6 @@
         <!-- Unique page content goes here -->
         {% endblock %}
     </main>
-
-   
 
     <script src="/static/js/main.js"></script>
 </body>
