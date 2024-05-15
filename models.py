@@ -79,12 +79,27 @@ class Article(Base):
     __tablename__ = "articles"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    title: Mapped[str] = mapped_column(String)
-    content: Mapped[str] = mapped_column(String)
-    author: Mapped[str] = mapped_column(String, ForeignKey("user.username"))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    title = Column(String)
+    content = Column(String)
+    author_id = Column(String, ForeignKey("user.username"))
+    created_at = Column(DateTime, default=datetime.now)
 
-    author_user = relationship("User", foreign_keys=[author])
+    author = relationship("User", foreign_keys=[author_id])
+    comments = relationship("Comment", back_populates="article", cascade="all, delete-orphan")
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    article_id = Column(String, ForeignKey("articles.id"))
+    author_id = Column(String, ForeignKey("user.username"))
+    content = Column(String)
+    created_at = Column(DateTime, default=datetime.now)
+
+    article = relationship("Article", foreign_keys=[article_id], back_populates="comments")
+    author = relationship("User", foreign_keys=[author_id])
+
 
     
 

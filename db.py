@@ -14,6 +14,7 @@ from encryption import get_fernet
 from sqlalchemy import or_
 
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 
 
@@ -323,11 +324,25 @@ def get_last_seen(username: str, friend_username: str):
 
 def add_article(title: str, content: str, author: str):
     with Session(engine) as session:
-        article = Article(title=title, content=content, author=author)
+        article = Article(title=title, content=content, author_id=author)
         session.add(article)
         session.commit()
 
-def get_all_articles():
+def get_articles():
     with Session(engine) as session:
-        articles = session.query(Article).order_by(Article.created_at.desc()).all()
-        return articles
+        return session.query(Article).options(
+            joinedload(Article.author),
+            joinedload(Article.comments).joinedload(Comment.author)
+        ).order_by(Article.created_at.desc()).all()
+
+
+
+def add_comment(article_id: str, content: str, author_id: str):
+    with Session(engine) as session:
+        comment = Comment(article_id=article_id, content=content, author_id=author_id)
+        session.add(comment)
+        session.commit()
+
+def get_comments(article_id: str):
+    with Session(engine) as session:
+        return session.query(Comment).options(joinedload(Comment.author)).filter_by(article_id=article_id).order_by(Comment.created_at.asc()).all()

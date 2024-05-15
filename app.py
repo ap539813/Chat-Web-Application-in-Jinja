@@ -195,19 +195,27 @@ def signup_user():
 def page_not_found(_):
     return render_template('404.jinja'), 404
 
-@app.route("/articles", methods=["GET", "POST"])
+@app.route("/articles", methods=["GET"])
 def articles():
-    if request.method == "POST":
-        if 'username' not in session:
-            abort(401)
-        title = request.form.get("title")
-        content = request.form.get("content")
-        author = session['username']
-        db.add_article(title, content, author)
-        return redirect(url_for('articles'))
+    articles = db.get_articles()
+    return render_template("articles.jinja", articles=articles)
 
-    all_articles = db.get_all_articles()
-    return render_template("articles.jinja", articles=all_articles)
+@app.route("/submit_article", methods=["POST"])
+def submit_article():
+    title = request.form['title']
+    content = request.form['content']
+    author_id = session['username']  # assuming the user's username is stored in session
+    db.add_article(title, content, author_id)
+    return redirect(url_for('articles'))
+
+@app.route("/submit_comment/<article_id>", methods=["POST"])
+def submit_comment(article_id):
+    content = request.form['comment']
+    author_id = session['username']  # assuming the user's username is stored in session
+    db.add_comment(article_id, content, author_id)
+    return redirect(url_for('articles'))
+
+
 
 # home page, where the messaging app is
 @app.route("/home")
