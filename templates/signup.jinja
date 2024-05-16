@@ -5,6 +5,7 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="mb-4">Sign Up</h1>
+    <!-- <form method="post" action="/signup/user"> -->
     <form id="signupForm" class="needs-validation" novalidate action="#" method="post" onsubmit="event.preventDefault(); signup();">
         <div class="form-group">
             <label for="username">Username</label>
@@ -25,9 +26,11 @@
         <div class="form-group">
           <label for="role">Role</label>
           <select class="form-control" id="role" name="role" required>
-              <option value="Student">Student</option>
-              <option value="Staff">Staff</option>
-          </select>
+                <option value="STUDENT">Student</option>
+                <option value="ACADEMICS">Academics</option>
+                <option value="ADMINISTRATIVE">Administrative Staff</option>
+                <option value="ADMIN">Admin</option>
+            </select>
       </div>
       
         
