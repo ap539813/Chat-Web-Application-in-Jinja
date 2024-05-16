@@ -44,6 +44,8 @@ class User(Base):
     password: Mapped[str] = mapped_column(String)
     role: Mapped[UserRole] = mapped_column(SQLEnum(UserRole, name="user_roles"))
     is_online: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_muted: Mapped[bool] = mapped_column(Boolean, default=False)
+
     
 
 # stateful counter used to generate the room id

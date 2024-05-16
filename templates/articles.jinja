@@ -3,7 +3,6 @@
 {% block content %}
 <div class="container mt-5">
     {% if role in ['ADMIN', 'ACADEMICS', 'STUDENT', 'ADMINISTRATIVE'] %}
-    <!-- Article Submission Form -->
     <div class="row mb-4">
         <div class="col-md-12">
             <h2>Write an Article</h2>
@@ -22,7 +21,6 @@
     </div>
     {% endif %}
 
-    <!-- Articles List -->
     <div class="row">
         <div class="col-md-12">
             <h2>Articles</h2>
@@ -30,15 +28,28 @@
             <div class="card mb-3">
                 <div class="card-header">
                     {{ article.title }}
+                    {% if role in ['ADMIN', 'ACADEMICS', 'ADMINISTRATIVE'] or (role == 'STUDENT' and article.author.username == session['username']) %}
+                    <form class="d-inline" method="post" action="{{ url_for('delete_article', article_id=article.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm float-right ml-2">Delete</button>
+                    </form>
+                    <!-- Add data attributes to store the title and content safely -->
+                    <button class="btn btn-warning btn-sm float-right" 
+                            onclick="showEditArticleForm('{{ article.id }}')" 
+                            data-title="{{ article.title|replace('"', '&quot;')|replace("'", "&#39;")|replace('\n', '\\n')|replace('\r', '') }}" 
+                            data-content="{{ article.content|replace('"', '&quot;')|replace("'", "&#39;")|replace('\n', '\\n')|replace('\r', '') }}">
+                            Edit
+                    </button>
+
+
+                    {% endif %}
                 </div>
                 <div class="card-body">
-                    <p class="card-text">{{ article.content }}</p>
-                    <p class="card-text"><small class="text-muted">Written by {{ article.author.username }} ({{article.author.role.name}}) on {{ article.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small></p>
-                    
-                    <!-- Comments Section -->
+                    <p class="card-text" style="white-space: pre-line;">{{ article.content }}</p>
+                    <p class="card-text"><small class="text-muted">Written by {{ article.author.username }} on {{ article.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small></p>
+    
                     <div>
                         <h5>
-                            <a href="#commentsCollapse-{{ article.id }}" data-toggle="collapse" aria-expanded="false" aria-controls="commentsCollapse-{{ article.id }}" class="d-block">
+                            <a href="#commentsCollapse-{{ article.id }}" data-toggle="collapse" aria-expanded="false" aria-controls="commentsCollapse-{{ article.id }}">
                                 Comments <span class="collapse-arrow float-right">&#9660;</span>
                             </a>
                         </h5>
@@ -50,12 +61,12 @@
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
                             </form>
-
                             <ul class="list-group mb-3">
                                 {% for comment in article.comments %}
                                 <li class="list-group-item">
-                                    <p>{{ comment.content }}</p>
-                                    <small class="text-muted">Commented by {{ comment.author.username }}  ({{comment.author.role.name}}) on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                    <!-- Use CSS to preserve formatting like line breaks for comments too -->
+                                    <p style="white-space: pre-line;">{{ comment.content }}</p>
+                                    <small class="text-muted">Commented by {{ comment.author.username }} on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -68,19 +79,94 @@
     </div>
 </div>
 
+<!-- Modal for Editing Articles -->
+<div class="modal fade" id="editArticleModal" tabindex="-1" role="dialog" aria-labelledby="editArticleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editArticleModalLabel">Edit Article</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editArticleModalBody">
+                <!-- Dynamic form content goes here -->
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- Include Font Awesome for icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<!-- Modal for Editing Comments -->
+<div class="modal fade" id="editCommentModal" tabindex="-1" role="dialog" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCommentModalLabel">Edit Comment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editCommentModalBody">
+                <!-- Dynamic form content goes here -->
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     $(document).ready(function() {
-        // Toggle chevron icon on collapse/expand
         $('.collapse').on('show.bs.collapse', function () {
             $(this).prev().find('.fa-chevron-down').removeClass('fa-chevron-down').addClass('fa-chevron-up');
         }).on('hide.bs.collapse', function () {
             $(this).prev().find('.fa-chevron-up').removeClass('fa-chevron-up').addClass('fa-chevron-down');
         });
     });
-</script>
 
+    function showEditArticleForm(articleId) {
+        // Access the button by articleId and retrieve the data attributes
+        var button = document.querySelector(`button[onclick="showEditArticleForm('${articleId}')"]`);
+
+        console.log(button.getAttribute('data-content'));
+        // Retrieve data from attributes and handle JSON parsing to manage special characters safely
+        var title = button.getAttribute('data-title');
+        var content = button.getAttribute('data-content');
+
+        let formHtml = `
+            <form method="post" action="{{ url_for('edit_article', article_id='') }}${articleId}">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" value="${title}" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea class="form-control" id="content" name="content" rows="5" required>${content}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Article</button>
+            </form>
+        `;
+        $('#editArticleModalBody').html(formHtml);
+        $('#editArticleModal').modal('show');
+    }
+
+
+    function showEditCommentForm(commentId) {
+    // Access the button by commentId and retrieve the data attribute for content
+    var button = document.querySelector(`button[onclick="showEditCommentForm('${commentId}')"]`);
+    var content = button.getAttribute('data-content');
+
+    let formHtml = `
+        <form method="post" action="{{ url_for('edit_comment', comment_id='') }}${commentId}">
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea class="form-control" id="content" name="content" rows="2" required>${content}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Comment</button>
+        </form>
+    `;
+    console.log(formHtml);
+    $('#editCommentModalBody').html(formHtml);
+    $('#editCommentModal').modal('show');
+}
+
+</script>
 {% endblock %}

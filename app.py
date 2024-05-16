@@ -5,7 +5,7 @@ the socket event handlers are inside of socket_routes.py
 '''
 
 from flask import Flask, render_template, request, abort, url_for, session, redirect, jsonify
-
+from flask_cors import CORS
 from flask_socketio import SocketIO
 import db
 import secrets
@@ -23,6 +23,7 @@ import ssl
 # log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
+CORS(app)
 
 # secret key used to sign the session cookie
 app.config['SECRET_KEY'] = secrets.token_hex()
@@ -186,7 +187,7 @@ def signup_user():
     # Insert user logic here
     # Assume db.insert_user handles adding the user
     try:
-        db.insert_user(username, password, role)  # Convert string to UserRole
+        db.insert_user(username, password, role)  # Convert string to db.UserRole
         # return jsonify({"message": "User created successfully"}), 200
         session['username'] = username
         session['token'] = generate_token(username)
@@ -223,9 +224,9 @@ def articles():
         abort(401)
 
     articles = db.get_articles()
-    print(user.role)
+    print(user.role.name)
     print(articles)
-    return render_template("articles.jinja", articles=articles, role = user.role.name)
+    return render_template("articles.jinja", articles=articles, role = user.role.name, username = username)
 
 
 @app.route("/submit_article", methods=["POST"])
@@ -242,6 +243,85 @@ def submit_comment(article_id):
     author_id = session['username']  # assuming the user's username is stored in session
     db.add_comment(article_id, content, author_id)
     return redirect(url_for('articles'))
+
+
+
+@app.route("/edit_article/<article_id>", methods=["POST"])
+def edit_article(article_id):
+    if 'username' not in session:
+        abort(401)
+    username = session['username']
+    user = db.get_user(username)
+    # if not user or user.role.name not in ['', 'ADMIN', 'ACADEMICS', 'ADMINISTRATIVE']:
+    #     abort(403)
+
+    title = request.form.get('title')
+    content = request.form.get('content')
+    db.update_article(article_id, title, content)
+    return redirect(url_for('articles'))
+
+@app.route("/delete_article/<article_id>", methods=["POST"])
+def delete_article(article_id):
+    if 'username' not in session:
+        abort(401)
+    username = session['username']
+    user = db.get_user(username)
+    # if not user or user.role.name not in ['ADMIN', 'ACADEMICS', 'ADMINISTRATIVE']:
+    #     abort(403)
+
+    db.delete_article(article_id)
+    return redirect(url_for('articles'))
+
+@app.route("/edit_comment/<comment_id>", methods=["POST"])
+def edit_comment(comment_id):
+    if 'username' not in session:
+        abort(401)
+    username = session['username']
+    user = db.get_user(username)
+    # if not user or user.role.name not in ['ADMIN', 'ACADEMICS', 'ADMINISTRATIVE']:
+    #     abort(403)
+
+    print(comment_id)
+    content = request.form.get('content')
+    db.update_comment(comment_id, content)
+    return redirect(url_for('articles'))
+
+@app.route("/delete_comment/<comment_id>", methods=["POST"])
+def delete_comment(comment_id):
+    if 'username' not in session:
+        abort(401)
+    username = session['username']
+    user = db.get_user(username)
+    # if not user or user.role.name not in ['ADMIN', 'ACADEMICS', 'ADMINISTRATIVE']:
+    #     abort(403)
+
+    db.delete_comment(comment_id)
+    return redirect(url_for('articles'))
+
+@app.route("/mute_user/<username>", methods=["POST"])
+def mute_user(username):
+    if 'username' not in session:
+        abort(401)
+    current_user = session['username']
+    user = db.get_user(current_user)
+    if not user or user.role.name != 'ADMIN':
+        abort(403)
+
+    db.mute_user(username)
+    return redirect(url_for('home', username=current_user))
+
+@app.route("/unmute_user/<username>", methods=["POST"])
+def unmute_user(username):
+    if 'username' not in session:
+        abort(401)
+    current_user = session['username']
+    user = db.get_user(current_user)
+    if not user or user.role.name != 'ADMIN':
+        abort(403)
+
+    db.unmute_user(username)
+    return redirect(url_for('home', username=current_user))
+
 
 
 

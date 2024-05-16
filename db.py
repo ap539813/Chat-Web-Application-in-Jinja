@@ -346,3 +346,50 @@ def add_comment(article_id: str, content: str, author_id: str):
 def get_comments(article_id: str):
     with Session(engine) as session:
         return session.query(Comment).options(joinedload(Comment.author)).filter_by(article_id=article_id).order_by(Comment.created_at.asc()).all()
+    
+
+
+# Add functions for muting/unmuting users
+def mute_user(username: str):
+    with Session(engine) as session:
+        user = session.get(User, username)
+        if user:
+            user.is_muted = True
+            session.commit()
+
+def unmute_user(username: str):
+    with Session(engine) as session:
+        user = session.get(User, username)
+        if user:
+            user.is_muted = False
+            session.commit()
+
+# Add functions for modifying and deleting articles and comments
+def update_article(article_id: str, title: str, content: str):
+    with Session(engine) as session:
+        article = session.get(Article, article_id)
+        if article:
+            article.title = title
+            article.content = content
+            session.commit()
+
+def delete_article(article_id: str):
+    with Session(engine) as session:
+        article = session.get(Article, article_id)
+        if article:
+            session.delete(article)
+            session.commit()
+
+def update_comment(comment_id: str, content: str):
+    with Session(engine) as session:
+        comment = session.get(Comment, comment_id)
+        if comment:
+            comment.content = content
+            session.commit()
+
+def delete_comment(comment_id: str):
+    with Session(engine) as session:
+        comment = session.get(Comment, comment_id)
+        if comment:
+            session.delete(comment)
+            session.commit()
