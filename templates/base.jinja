@@ -30,13 +30,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ml-auto"> <!-- Added ml-auto here -->
-                        <li class="nav-item {{ 'active' if request.endpoint == 'articles' else '' }}">
-                            <a class="nav-link" href="{{ url_for('articles') }}">Articles</a>
-                        </li>
-                        <li class="nav-item {{ 'active' if request.endpoint == 'messaging' else '' }}">
-                            <a class="nav-link" href="{{ url_for('home') }}">Messaging</a>
-                        </li>
+                    <ul class="navbar-nav ml-auto">
                         {% if 'username' not in session %}
                             <li class="nav-item {{ 'active' if request.endpoint == 'login' else '' }}">
                                 <a class="nav-link" href="{{ url_for('login') }}">Login</a>
@@ -45,11 +39,19 @@
                                 <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
                             </li>
                         {% else %}
+                            <li class="nav-item {{ 'active' if request.endpoint == 'home' else '' }}">
+                                <!-- Adjusted to include the username in the URL -->
+                                <a class="nav-link" href="{{ url_for('home', username=session['username']) }}">Home</a>
+                            </li>
+                            <li class="nav-item {{ 'active' if request.endpoint == 'articles' else '' }}">
+                                <a class="nav-link" href="{{ url_for('articles') }}">Articles</a>
+                            </li>
                             <li class="nav-item {{ 'active' if request.endpoint == 'logout' else '' }}">
                                 <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                             </li>
                         {% endif %}
                     </ul>
+                    
                 </div>
             </div>
         </nav>
