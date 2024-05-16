@@ -4,7 +4,8 @@ this is where you'll find all of the get/post request handlers
 the socket event handlers are inside of socket_routes.py
 '''
 
-from flask import Flask, render_template, request, abort, url_for, session, redirect
+from flask import Flask, render_template, request, abort, url_for, session, redirect, jsonify
+
 from flask_socketio import SocketIO
 import db
 import secrets
@@ -142,12 +143,12 @@ def login_user():
     if user is None:
         return "Error: User does not exist!"
 
-    hashed_password = hashlib.sha256((password + salt).encode()).hexdigest()
+    # hashed_password = hashlib.sha256((password + salt).encode()).hexdigest()
     
-    if user.password != hashed_password:
+    if user.password != password:
         return "Error: Password does not match!"
 
-    db.set_user_online(username)  # Update online status
+    db.set_user_online(username)  
 
     session['username'] = username
     session['token'] = generate_token(username)
@@ -173,32 +174,59 @@ def signup():
 # handles a post request when the user clicks the signup button
 @app.route("/signup/user", methods=["POST"])
 def signup_user():
-    if not request.is_json:
-        abort(404)
-    
-    username = request.json.get("username")
-    password = request.json.get("password")
-    salt = request.json.get("salt")
-    role = request.json.get("role")  
+    print(request.json)
+    username = request.json['username']
+    password = request.json['password']
+    role = request.json['role']  # Ensure this matches enum by converting to lowercase
 
-    if db.get_user(username) is None:
-        hashed_password = hashlib.sha256((password + salt).encode()).hexdigest()
-        db.insert_user(username, hashed_password, role)  # Adjust the method to accept role
+    # Validate role
+    if not db.is_valid_role(role):
+        return jsonify({"error": "Invalid role"}), 400
+
+    # Insert user logic here
+    # Assume db.insert_user handles adding the user
+    try:
+        db.insert_user(username, password, role)  # Convert string to UserRole
+        # return jsonify({"message": "User created successfully"}), 200
         session['username'] = username
         session['token'] = generate_token(username)
         db.set_user_online(username)
         return url_for('home', username=username)
-    return "Error: User already exists!"
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Helper method in your enum class or elsewhere suitable
+@classmethod
+def has_value(cls, value):
+    return value in cls._value2member_map_
 
 # handler when a "404" error happens
 @app.errorhandler(404)
 def page_not_found(_):
     return render_template('404.jinja'), 404
 
-@app.route("/articles", methods=["GET"])
+# @app.route("/articles", methods=["GET"])
+# def articles():
+#     articles = db.get_articles()
+#     return render_template("articles.jinja", articles=articles)
+
+
+@app.route("/articles")
 def articles():
+    if 'username' not in session:
+        abort(401)
+
+    username = session['username']
+    user = db.get_user(username)
+    if not user:
+        abort(401)
+
     articles = db.get_articles()
-    return render_template("articles.jinja", articles=articles)
+    print(user.role)
+    print(articles)
+    return render_template("articles.jinja", articles=articles, role = user.role.name)
+
 
 @app.route("/submit_article", methods=["POST"])
 def submit_article():
