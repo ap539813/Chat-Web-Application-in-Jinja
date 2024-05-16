@@ -10,30 +10,40 @@ Prisma docs also looks so much better in comparison
 or use SQLite, if you're not into fancy ORMs (but be mindful of Injection attacks :) )
 '''
 
-from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean
+from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Enum as SQLEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Dict
 import uuid
 from datetime import datetime
 # from .base import Base
 
+# from sqlalchemy import Enum as PyEnum
+
+from enum import Enum as PyEnum
+
+
 # data models
 class Base(DeclarativeBase):
     pass
 
-# model to store user information
+class UserRole(PyEnum):
+    STUDENT = "student"
+    ACADEMICS = "academics"
+    ADMINISTRATIVE = "administrative"
+    ADMIN = "admin"
+
+def is_valid_role(role):
+    print(role, UserRole.__members__)
+    return role in UserRole.__members__
+
+
 class User(Base):
     __tablename__ = "user"
     
-    # looks complicated but basically means
-    # I want a username column of type string,
-    # and I want this column to be my primary key
-    # then accessing john.username -> will give me some data of type string
-    # in other words we've mapped the username Python object property to an SQL column of type String 
     username: Mapped[str] = mapped_column(String, primary_key=True)
     password: Mapped[str] = mapped_column(String)
-    role: Mapped[str] = mapped_column(String)  # New field for user role
-    is_online: Mapped[bool] = mapped_column(Boolean, default=False)  # New field to track online status
+    role: Mapped[UserRole] = mapped_column(SQLEnum(UserRole, name="user_roles"))
+    is_online: Mapped[bool] = mapped_column(Boolean, default=False)
     
 
 # stateful counter used to generate the room id
