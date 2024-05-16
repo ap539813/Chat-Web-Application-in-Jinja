@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container mt-5">
+    {% if role in ['ADMIN', 'ACADEMICS', 'STUDENT', 'ADMINISTRATIVE'] %}
     <!-- Article Submission Form -->
     <div class="row mb-4">
         <div class="col-md-12">
@@ -19,6 +20,7 @@
             </form>
         </div>
     </div>
+    {% endif %}
 
     <!-- Articles List -->
     <div class="row">
@@ -31,17 +33,16 @@
                 </div>
                 <div class="card-body">
                     <p class="card-text">{{ article.content }}</p>
-                    <p class="card-text"><small class="text-muted">Written by {{ article.author.username }} on {{ article.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small></p>
+                    <p class="card-text"><small class="text-muted">Written by {{ article.author.username }} ({{article.author.role.name}}) on {{ article.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small></p>
                     
                     <!-- Comments Section -->
                     <div>
-                        
                         <h5>
-                            <a href="#commentsCollapse{{ article.id }}" data-toggle="collapse" aria-expanded="false" aria-controls="commentsCollapse{{ article.id }}" class="d-block">
-                                Comments <i class="fas fa-chevron-down"></i>
+                            <a href="#commentsCollapse-{{ article.id }}" data-toggle="collapse" aria-expanded="false" aria-controls="commentsCollapse-{{ article.id }}" class="d-block">
+                                Comments <span class="collapse-arrow float-right">&#9660;</span>
                             </a>
                         </h5>
-                        <div id="commentsCollapse{{ article.id }}" class="collapse">
+                        <div id="commentsCollapse-{{ article.id }}" class="collapse">
                             <form method="post" action="{{ url_for('submit_comment', article_id=article.id) }}">
                                 <div class="form-group">
                                     <label for="comment">Add a comment</label>
@@ -54,12 +55,11 @@
                                 {% for comment in article.comments %}
                                 <li class="list-group-item">
                                     <p>{{ comment.content }}</p>
-                                    <small class="text-muted">Commented by {{ comment.author.username }} on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                    <small class="text-muted">Commented by {{ comment.author.username }}  ({{comment.author.role.name}}) on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
                                 </li>
                                 {% endfor %}
                             </ul>
                         </div>
-                        
                     </div>
                 </div>
             </div>
@@ -67,6 +67,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Include Font Awesome for icons -->
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
