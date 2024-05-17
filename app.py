@@ -178,7 +178,7 @@ def signup_user():
     print(request.json)
     username = request.json['username']
     password = request.json['password']
-    role = request.json['role']  # Ensure this matches enum by converting to lowercase
+    role = request.json['role']  
     email = request.json['email']
     full_name = request.json['full_name']
 

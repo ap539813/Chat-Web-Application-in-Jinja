@@ -102,7 +102,6 @@
                                         <button type="submit" class="btn btn-danger btn-sm float-right ml-2" style="background: transparent; border: none; color: inherit;"><i class="fas fa-trash-alt"></i></button>
                                     </form>
                                     {% endif %}
-                                    <!-- Use CSS to preserve formatting like line breaks for comments too -->
                                     <p style="white-space: pre-line;">{{ comment.content }}</p>
                                     <!-- <small class="text-muted">Commented by {{ comment.author.username }} on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small> -->
                                     <small class="text-muted">
@@ -147,7 +146,6 @@
                 </button>
             </div>
             <div class="modal-body" id="editArticleModalBody">
-                <!-- Dynamic form content goes here -->
             </div>
         </div>
     </div>
@@ -164,7 +162,6 @@
                 </button>
             </div>
             <div class="modal-body" id="editCommentModalBody">
-                <!-- Dynamic form content goes here -->
             </div>
         </div>
     </div>
@@ -180,11 +177,9 @@
     });
 
     function showEditArticleForm(articleId) {
-        // Access the button by articleId and retrieve the data attributes
         var button = document.querySelector(`button[onclick="showEditArticleForm('${articleId}')"]`);
 
         console.log(button.getAttribute('data-content'));
-        // Retrieve data from attributes and handle JSON parsing to manage special characters safely
         var title = button.getAttribute('data-title');
         var content = button.getAttribute('data-content');
 
@@ -207,7 +202,6 @@
 
 
     function showEditCommentForm(commentId) {
-    // Access the button by commentId and retrieve the data attribute for content
     var button = document.querySelector(`button[onclick="showEditCommentForm('${commentId}')"]`);
     var content = button.getAttribute('data-content');
 
