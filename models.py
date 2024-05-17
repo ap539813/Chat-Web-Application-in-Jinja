@@ -10,7 +10,7 @@ Prisma docs also looks so much better in comparison
 or use SQLite, if you're not into fancy ORMs (but be mindful of Injection attacks :) )
 '''
 
-from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Enum as SQLEnum
+from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Enum as SQLEnum, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Dict
 import uuid
@@ -43,8 +43,12 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, primary_key=True)
     password: Mapped[str] = mapped_column(String)
     role: Mapped[UserRole] = mapped_column(SQLEnum(UserRole, name="user_roles"))
+    email: Mapped[str] = mapped_column(String)
+    full_name: Mapped[str] = mapped_column(String)
     is_online: Mapped[bool] = mapped_column(Boolean, default=False)
     is_muted: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
 
     
 
@@ -85,6 +89,7 @@ class Room():
         if user not in self.dict.keys():
             return None
         return self.dict[user]
+    
     
 
 class Article(Base):

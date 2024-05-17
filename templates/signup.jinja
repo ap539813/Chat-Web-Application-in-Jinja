@@ -24,6 +24,22 @@
         </div>
 
         <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+            <div class="invalid-feedback">
+                Please enter a valid email address.
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" required>
+            <div class="invalid-feedback">
+                Please enter your full name.
+            </div>
+        </div>
+
+        <div class="form-group">
           <label for="role">Role</label>
           <select class="form-control" id="role" name="role" required>
                 <option value="STUDENT">Student</option>
@@ -32,6 +48,7 @@
                 <option value="ADMIN">Admin</option>
             </select>
       </div>
+      
       
         
         <button type="submit" class="btn btn-primary">Sign Up</button>
@@ -53,16 +70,20 @@ async function signup() {
     const username = $("#username").val();
     const password = $("#password").val();
     const role = $("#role").val(); 
+    const email = $("#email").val();
+    const full_name = $("#full_name").val();
     const salt = "MySecureSalt123!@#"; 
     const hashedPassword = CryptoJS.SHA256(password + salt).toString();
     const signupURL = "{{ url_for('signup_user') }}";
 
-    // Include 'role' in the data sent to the server
+    // Include additional data in the post request
     const res = await axios.post(signupURL, {
         username: username,
         password: hashedPassword,
         salt: salt,
-        role: role  
+        role: role,
+        email: email,
+        full_name: full_name
     });
 
     if (!isValidURL(res.data)) {
@@ -72,6 +93,7 @@ async function signup() {
 
     window.open(res.data, "_self");
 }
+
 
 </script>
 {% endblock %}

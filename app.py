@@ -179,15 +179,15 @@ def signup_user():
     username = request.json['username']
     password = request.json['password']
     role = request.json['role']  # Ensure this matches enum by converting to lowercase
+    email = request.json['email']
+    full_name = request.json['full_name']
 
     # Validate role
     if not db.is_valid_role(role):
         return jsonify({"error": "Invalid role"}), 400
 
-    # Insert user logic here
-    # Assume db.insert_user handles adding the user
     try:
-        db.insert_user(username, password, role)  # Convert string to db.UserRole
+        db.insert_user(username, password, role, email, full_name)  # Convert string to db.UserRole
         # return jsonify({"message": "User created successfully"}), 200
         session['username'] = username
         session['token'] = generate_token(username)
@@ -233,14 +233,14 @@ def articles():
 def submit_article():
     title = request.form['title']
     content = request.form['content']
-    author_id = session['username']  # assuming the user's username is stored in session
+    author_id = session['username'] 
     db.add_article(title, content, author_id)
     return redirect(url_for('articles'))
 
 @app.route("/submit_comment/<article_id>", methods=["POST"])
 def submit_comment(article_id):
     content = request.form['comment']
-    author_id = session['username']  # assuming the user's username is stored in session
+    author_id = session['username']
     db.add_comment(article_id, content, author_id)
     return redirect(url_for('articles'))
 
@@ -323,6 +323,12 @@ def unmute_user(username):
     return redirect(url_for('home', username=current_user))
 
 
+@app.route('/profile/<username>')
+def profile(username):
+    user = db.get_user(username)
+    if not user:
+        abort(404, description="User not found")
+    return render_template('profile.jinja', user=user)
 
 
 # home page, where the messaging app is

@@ -27,25 +27,34 @@
             {% for article in articles %}
             <div class="card mb-3">
                 <div class="card-header">
-                    {{ article.title }}
                     {% if role in ['ADMIN', 'ACADEMICS', 'ADMINISTRATIVE'] or (role == 'STUDENT' and article.author.username == session['username']) %}
-                    <form class="d-inline" method="post" action="{{ url_for('delete_article', article_id=article.id) }}">
-                        <button type="submit" class="btn btn-danger btn-sm float-right ml-2">Delete</button>
+                    <!-- Delete button with icon -->
+                    <form class="d-inline float-right ml-2" method="post" action="{{ url_for('delete_article', article_id=article.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
                     </form>
-                    <!-- Add data attributes to store the title and content safely -->
-                    <button class="btn btn-warning btn-sm float-right" 
-                            onclick="showEditArticleForm('{{ article.id }}')" 
-                            data-title="{{ article.title|replace('"', '&quot;')|replace("'", "&#39;")|replace('\n', '\\n')|replace('\r', '') }}" 
-                            data-content="{{ article.content|replace('"', '&quot;')|replace("'", "&#39;")|replace('\n', '\\n')|replace('\r', '') }}">
-                            Edit
-                    </button>
-
-
                     {% endif %}
+                    <h3><strong>{{ article.title }}</strong></h3>
+                    
+
+
+                    
                 </div>
                 <div class="card-body">
                     <p class="card-text" style="white-space: pre-line;">{{ article.content }}</p>
                     <p class="card-text"><small class="text-muted">Written by {{ article.author.username }} on {{ article.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small></p>
+                    
+                    <!-- Edit button with icon -->
+                    {% if role in ['ADMIN', 'ACADEMICS', 'ADMINISTRATIVE'] or (role == 'STUDENT' and article.author.username == session['username']) %}
+                    <button class="btn btn-warning btn-sm float-right" 
+                            onclick="showEditArticleForm('{{ article.id }}')" 
+                            data-title="{{ article.title|replace('"', '&quot;')|replace("'", "&#39;")|replace('\n', '\\n')|replace('\r', '') }}" 
+                            data-content="{{ article.content|replace('"', '&quot;')|replace("'", "&#39;")|replace('\n', '\\n')|replace('\r', '') }}">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    {% endif %}
+
+                    <br>
+                    <br>
     
                     <div>
                         <h5>

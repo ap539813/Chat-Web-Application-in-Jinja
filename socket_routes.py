@@ -92,4 +92,4 @@ def leave(username, room_id):
     emit("incoming", (f"{username} has left the room.", "red", "system"), to=room_id)
     leave_room(room_id)
     room.leave_room(username)
-    db.update_last_seen(username, room.get_receiver(username), datetime.now())
+    db.update_last_seen(username, username, datetime.now())

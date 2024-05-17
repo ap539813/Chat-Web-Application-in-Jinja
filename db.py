@@ -53,16 +53,9 @@ def set_user_offline(username: str):
             session.commit()
 
 
-# inserts a user to the database
-def insert_user(username: str, password: str, role: str):
+def insert_user(username: str, password: str, role: str, email: str, full_name: str):
     with Session(engine) as session:
-        user = User(username=username, password=password, role=role)
-        session.add(user)
-        session.commit()
-
-def insert_user(username: str, password: str, role: str):
-    with Session(engine) as session:
-        user = User(username=username, password=password, role=role)
+        user = User(username=username, password=password, role=role, email=email, full_name=full_name)
         session.add(user)
         session.commit()
 
