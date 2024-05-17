@@ -315,9 +315,9 @@ def get_last_seen(username: str, friend_username: str):
 
 
 
-def add_article(title: str, content: str, author: str):
+def add_article(title: str, content: str, author: str, anonymous: bool):
     with Session(engine) as session:
-        article = Article(title=title, content=content, author_id=author)
+        article = Article(title=title, content=content, author_id=author, anonymous=anonymous)
         session.add(article)
         session.commit()
 
@@ -330,9 +330,9 @@ def get_articles():
 
 
 
-def add_comment(article_id: str, content: str, author_id: str):
+def add_comment(article_id: str, content: str, author_id: str, anonymous: bool):
     with Session(engine) as session:
-        comment = Comment(article_id=article_id, content=content, author_id=author_id)
+        comment = Comment(article_id=article_id, content=content, author_id=author_id, anonymous=anonymous)
         session.add(comment)
         session.commit()
 
@@ -356,6 +356,13 @@ def unmute_user(username: str):
         if user:
             user.is_muted = False
             session.commit()
+
+
+def get_all_users():
+    with Session(engine) as session:
+        users = session.query(User).all()
+        return users
+
 
 # Add functions for modifying and deleting articles and comments
 def update_article(article_id: str, title: str, content: str):

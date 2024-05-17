@@ -14,7 +14,58 @@
                     <p><strong>Status:</strong> {{ 'Online' if user.is_online else 'Offline' }}</p>
                 </div>
             </div>
+
+            {% if user.role.name == 'ADMIN' %}
+                <h2>Manage User Mute Status</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.username }}</td>
+                            <td>{{ 'Muted' if u.is_muted else 'Unmuted' }}</td>
+                            <td>
+                                {% if u.is_muted %}
+                                <button class="btn btn-success" onclick="toggleMute('{{ u.username }}', false)">Unmute</button>
+                                {% else %}
+                                <button class="btn btn-warning" onclick="toggleMute('{{ u.username }}', true)">Mute</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+
+            </table>
         </div>
     </div>
 </div>
+
+<script>
+    function toggleMute(username, mute) {
+        const actionUrl = mute ? "{{ url_for('mute_user') }}" : "{{ url_for('unmute_user') }}";
+        fetch(actionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: username })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
 {% endblock %}

@@ -226,23 +226,51 @@ def articles():
     articles = db.get_articles()
     print(user.role.name)
     print(articles)
-    return render_template("articles.jinja", articles=articles, role = user.role.name, username = username)
+    return render_template("articles.jinja", articles=articles, role = user.role.name, user = user)
 
+
+# @app.route("/submit_article", methods=["POST"])
+# def submit_article():
+#     title = request.form['title']
+#     content = request.form['content']
+#     author_id = session['username'] 
+#     db.add_article(title, content, author_id)
+#     return redirect(url_for('articles'))
 
 @app.route("/submit_article", methods=["POST"])
 def submit_article():
     title = request.form['title']
     content = request.form['content']
-    author_id = session['username'] 
-    db.add_article(title, content, author_id)
-    return redirect(url_for('articles'))
+    anonymous = 'anonymous' in request.form  
+    try:
+        db.add_article(title, content, session['username'], anonymous)
+        return redirect(url_for('articles'))
+    except Exception as e:
+        return str(e), 500
+
 
 @app.route("/submit_comment/<article_id>", methods=["POST"])
 def submit_comment(article_id):
     content = request.form['comment']
     author_id = session['username']
-    db.add_comment(article_id, content, author_id)
-    return redirect(url_for('articles'))
+    anonymous = 'anonymous' in request.form 
+    try:
+        db.add_comment(article_id, content, session['username'], anonymous)
+        return redirect(url_for('articles'))
+    except Exception as e:
+        return str(e), 500
+
+
+# @app.route("/submit_comment", methods=["POST"])
+# def submit_comment():
+#     article_id = request.args.get('article_id')
+#     content = request.form['comment']
+#     anonymous = 'anonymous' in request.form  
+#     try:
+#         db.add_comment(article_id, content, session['username'], anonymous)
+#         return redirect(url_for('article', article_id=article_id))
+#     except Exception as e:
+#         return str(e), 500
 
 
 
@@ -298,37 +326,78 @@ def delete_comment(comment_id):
     db.delete_comment(comment_id)
     return redirect(url_for('articles'))
 
-@app.route("/mute_user/<username>", methods=["POST"])
-def mute_user(username):
-    if 'username' not in session:
-        abort(401)
-    current_user = session['username']
-    user = db.get_user(current_user)
-    if not user or user.role.name != 'ADMIN':
-        abort(403)
+# @app.route("/mute_user/<username>", methods=["POST"])
+# def mute_user(username):
+#     if 'username' not in session:
+#         abort(401)
+#     current_user = session['username']
+#     user = db.get_user(current_user)
+#     if not user or user.role.name != 'ADMIN':
+#         abort(403)
 
-    db.mute_user(username)
-    return redirect(url_for('home', username=current_user))
+#     db.mute_user(username)
+#     return redirect(url_for('home', username=current_user))
 
-@app.route("/unmute_user/<username>", methods=["POST"])
-def unmute_user(username):
-    if 'username' not in session:
-        abort(401)
-    current_user = session['username']
-    user = db.get_user(current_user)
-    if not user or user.role.name != 'ADMIN':
-        abort(403)
+# @app.route("/unmute_user/<username>", methods=["POST"])
+# def unmute_user(username):
+#     if 'username' not in session:
+#         abort(401)
+#     current_user = session['username']
+#     user = db.get_user(current_user)
+#     if not user or user.role.name != 'ADMIN':
+#         abort(403)
 
-    db.unmute_user(username)
-    return redirect(url_for('home', username=current_user))
+#     db.unmute_user(username)
+#     return redirect(url_for('home', username=current_user))
 
+
+# @app.route('/profile/<username>')
+# def profile(username):
+#     user = db.get_user(username)
+#     if not user:
+#         abort(404, description="User not found")
+#     return render_template('profile.jinja', user=user)
 
 @app.route('/profile/<username>')
 def profile(username):
+    # Ensure the user is found in the database
     user = db.get_user(username)
     if not user:
         abort(404, description="User not found")
-    return render_template('profile.jinja', user=user)
+    
+    if 'username' in session and db.get_user(session['username']).role.name == 'ADMIN':
+        users = db.get_all_users()
+        return render_template('profile.jinja', user=user, users=users, is_admin=True)
+    else:
+        return render_template('profile.jinja', user=user, is_admin=False)
+
+
+
+
+@app.route('/mute_user', methods=['POST'])
+def mute_user():
+    if 'username' in session and db.get_user(session['username']).role.name == 'ADMIN':
+        data = request.get_json()
+        try:
+            db.mute_user(data['username'])
+            return jsonify({'message': 'User successfully muted'}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'Unauthorized access'}), 401
+
+
+@app.route('/unmute_user', methods=['POST'])
+def unmute_user():
+    if 'username' in session and db.get_user(session['username']).role.name == 'ADMIN':
+        data = request.get_json()
+        try:
+            db.unmute_user(data['username'])
+            return jsonify({'message': 'User successfully unmuted'}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'Unauthorized access'}), 401
 
 
 # home page, where the messaging app is

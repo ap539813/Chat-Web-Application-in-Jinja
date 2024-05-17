@@ -100,6 +100,7 @@ class Article(Base):
     content = Column(String)
     author_id = Column(String, ForeignKey("user.username"))
     created_at = Column(DateTime, default=datetime.now)
+    anonymous = Column(Boolean, default=False)
 
     author = relationship("User", foreign_keys=[author_id])
     comments = relationship("Comment", back_populates="article", cascade="all, delete-orphan")
@@ -113,6 +114,7 @@ class Comment(Base):
     author_id = Column(String, ForeignKey("user.username"))
     content = Column(String)
     created_at = Column(DateTime, default=datetime.now)
+    anonymous = Column(Boolean, default=False)
 
     article = relationship("Article", foreign_keys=[article_id], back_populates="comments")
     author = relationship("User", foreign_keys=[author_id])
