@@ -410,9 +410,10 @@ def home():
         abort(404)
     
     username = request.args.get("username")
+    user = db.get_user(username)
     friend_list = db.get_friends(username)
     sent_requests, received_requests = db.get_friend_requests(username)
-    return render_template("home.jinja", username=request.args.get("username"), sent_requests=sent_requests, received_requests=received_requests, friend_list=friend_list)
+    return render_template("home.jinja", username=request.args.get("username"), sent_requests=sent_requests, received_requests=received_requests, friend_list=friend_list, user = user)
 
  
 context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2) 

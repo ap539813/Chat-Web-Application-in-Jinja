@@ -107,6 +107,7 @@
                 </div>
     
                 <!-- Messaging App Section -->
+                {% if not user.is_muted %}
                 <div>
                     <h1>Messaging App</h1>
                     <div id="message_box" class="border p-3 mb-3">
@@ -122,6 +123,7 @@
                         <button class="btn btn-secondary" onclick="leave()">Leave Room</button>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
 </div>

@@ -78,6 +78,7 @@
                             </a>
                         </h5>
                         <div id="commentsCollapse-{{ article.id }}" class="collapse">
+                            {% if not user.is_muted %}
                             <form method="post" action="{{ url_for('submit_comment', article_id=article.id) }}">
                                 <div class="form-group">
                                     <label for="comment">Add a comment</label>
@@ -92,9 +93,15 @@
                                 <br>
                                 <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
                             </form>
+                            {% endif %}
                             <ul class="list-group mb-3">
                                 {% for comment in article.comments %}
                                 <li class="list-group-item">
+                                    {% if (role in ['ADMIN', 'ACADEMICS', 'ADMINISTRATIVE'] or (role == 'STUDENT' and comment.author.username == session['username'])) and not user.is_muted %}
+                                    <form class="d-inline float-right ml-2" style="background: transparent; border: none; color: inherit;" method="post" action="{{ url_for('delete_comment', comment_id=comment.id) }}">
+                                        <button type="submit" class="btn btn-danger btn-sm float-right ml-2" style="background: transparent; border: none; color: inherit;"><i class="fas fa-trash-alt"></i></button>
+                                    </form>
+                                    {% endif %}
                                     <!-- Use CSS to preserve formatting like line breaks for comments too -->
                                     <p style="white-space: pre-line;">{{ comment.content }}</p>
                                     <!-- <small class="text-muted">Commented by {{ comment.author.username }} on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small> -->
@@ -105,6 +112,18 @@
                                         Commented by {{ comment.author.username }} on {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
                                         {% endif %}
                                     </small>
+                                    {% if (role in ['ADMIN', 'ACADEMICS', 'ADMINISTRATIVE'] or (role == 'STUDENT' and comment.author.username == session['username'])) and not user.is_muted %}
+                                    <!-- <form class="d-inline" method="post" action="{{ url_for('delete_comment', comment_id=comment.id) }}">
+                                        <button type="submit" class="btn btn-danger btn-sm float-right ml-2">Delete</button>
+                                    </form>
+                                     -->
+                                    <button class="btn btn-warning btn-sm float-right" 
+                                            style="background: transparent; border: none; color: inherit; padding: 0.25em 0.5em; width: auto;"
+                                            onclick="showEditCommentForm('{{ comment.id }}')" 
+                                            data-content="{{ comment.content|replace('"', '&quot;')|replace("'", "&#39;")|replace('\n', '\\n')|replace('\r', '') }}">
+                                            <i class="fas fa-pencil-alt"></i>
+                                    </button>
+                                    {% endif %}
                                 </li>
                                 {% endfor %}
                             </ul>

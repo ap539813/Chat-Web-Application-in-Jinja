@@ -187,6 +187,7 @@ def reject_friend_request(username: str, friend_username: str):
             return True
         return False
 
+
 def store_message(sender: str, receiver: str, message: str):
     # fernet = Fernet(ENCRYPTION_KEY)
     encrypted_message = fernet.encrypt(message.encode())

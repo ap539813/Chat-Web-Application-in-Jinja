@@ -1,4 +1,3 @@
-/* style.css */
 body, html {
     margin: 0;
     padding: 0;
@@ -31,7 +30,7 @@ nav ul li a {
     margin: 0 5px;
     color: #ffffff;
     text-decoration: none;
-    border: 2px solid transparent; /* Add transparency for transition */
+    border: 2px solid transparent; 
     transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -41,7 +40,6 @@ nav ul li a:hover, nav ul li a:focus {
     color: #ffffff;
 }
 
-/* Styling for active link - adjust the class in the HTML as needed */
 .nav-active {
     background-color: #0056b3;
     border-color: #ffffff;
@@ -49,7 +47,7 @@ nav ul li a:hover, nav ul li a:focus {
 
 main {
     padding: 20px;
-    min-height: 600px; /* Adjust based on content */
+    min-height: 600px; 
 }
 
 footer {
@@ -106,8 +104,8 @@ button:hover {
 }
 
 body {
-    background-color: #f8f9fa;  /* A light grey background */
-    font-family: 'Arial', sans-serif; /* Ensures the font is consistent */
+    background-color: #f8f9fa;  
+    font-family: 'Arial', sans-serif; 
 }
 
 

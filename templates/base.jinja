@@ -23,10 +23,10 @@
             <div class="container">
                 {% if 'username' in session %}
                     <!-- If logged in, clicking the brand/logo logs out the user -->
-                    <a class="navbar-brand" href="{{ url_for('logout') }}">Friends's Portal</a>
+                    <a class="navbar-brand" href="{{ url_for('logout') }}">University's Portal</a>
                 {% else %}
                     <!-- If not logged in, clicking the brand/logo takes to the homepage -->
-                    <a class="navbar-brand" href="{{ url_for('index') }}">Friends's Portal</a>
+                    <a class="navbar-brand" href="{{ url_for('index') }}">University's Portal</a>
                 {% endif %}
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
